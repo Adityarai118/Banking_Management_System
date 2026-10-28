@@ -1,0 +1,57 @@
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Compiled Java Classes & Archives
+*.class
+*.war
+*.ear
+*.nar
+Bank Management System 2/libraries/sqlite-jdbc*
+Bank Management System 2/libraries/junit*
+Bank Management System 2/screenshots/
+
+# Maven & Build Tool Artifacts
+target/
+build/
+dist/
+generated/
+generated-sources/
+archive-tmp/
+
+# NetBeans IDE Private & Cache Files
+nbproject/private/
+nbproject/project.properties.bak
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# Visual Studio Code
+.vscode/
+
+# Local SQLite Database & Logs
+*.db
+*.db-journal
+*.sqlite
+*.log
+banking_system.db
+bank_system.db
+
+# Sensitive & Secret Files
+credentials.json
+secrets.properties
+*.pem
+*.key

@@ -1,65 +1,67 @@
 package bank.management.system;
 
-import java.awt.*;
-import javax.swing.*;
-import java.awt.event.*;
-import java.sql.*;
+import bank.management.system.service.AccountService;
 
-public class BalanceEnquiry extends JFrame implements ActionListener{
-    JButton b1;
-    String pin;
-    JLabel l1;
-    
-    BalanceEnquiry(String pin){
-        this.pin = pin;
-        
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+/**
+ * Screen displaying the real-time balance of the current account.
+ */
+public class BalanceEnquiry extends JFrame implements ActionListener {
+
+    private final String accountNumber;
+    private final JButton b1;
+
+    public BalanceEnquiry(String accountNumber) {
+        this.accountNumber = accountNumber;
+
         setLayout(null);
-        
+
         ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("icon/icons/atm.jpg"));
-        Image i2 = i1.getImage().getScaledInstance(700, 700, Image.SCALE_DEFAULT);
-        ImageIcon i3 = new ImageIcon(i2);
-        JLabel l = new JLabel(i3);
-        l.setBounds(0, 0, 700, 700);
-        add(l);
-        
+        Image i2 = i1.getImage().getScaledInstance(700, 700, Image.SCALE_SMOOTH);
+        JLabel background = new JLabel(new ImageIcon(i2));
+        background.setBounds(0, 0, 700, 700);
+        add(background);
+
         b1 = new JButton("BACK");
-        b1.setBounds(280,400,120,25);
-        l.add(b1);
+        b1.setBounds(270, 390, 110, 25);
+        background.add(b1);
         b1.addActionListener(this);
-        
-        int balance = 0;
-        try{
-            Conn c1 = new Conn();
-            ResultSet rs = c1.s.executeQuery("select * from bank where pin = '"+pin+"'");
-            while (rs.next()) {
-                if (rs.getString("type").equals("Deposit")) {
-                    balance += Integer.parseInt(rs.getString("amount"));
-                } else {
-                    balance -= Integer.parseInt(rs.getString("amount"));
-                }
-            }
-        }catch(Exception e){
-            System.out.println(e);
+
+        double balance = 0.0;
+        try {
+            AccountService service = new AccountService();
+            balance = service.getBalance(accountNumber);
+        } catch (Exception e) {
+            System.err.println("Balance check error: " + e.getMessage());
         }
-        
-        l1 = new JLabel("Your Current Balance is Rs "+balance);
+
+        JLabel l1 = new JLabel("Your Current Balance is:");
         l1.setForeground(Color.WHITE);
-        l1.setFont(new Font("System", Font.BOLD, 16));
-        l1.setBounds(120,220,450,30);
-        l.add(l1);
-        
+        l1.setFont(new Font("System", Font.BOLD, 15));
+        l1.setBounds(135, 230, 300, 25);
+        background.add(l1);
+
+        JLabel l2 = new JLabel(String.format("Rs. %.2f", balance));
+        l2.setForeground(new Color(144, 238, 144)); // Light green
+        l2.setFont(new Font("System", Font.BOLD, 22));
+        l2.setBounds(135, 265, 300, 35);
+        background.add(l2);
+
         setSize(700, 700);
-        setLocation(200, 0);
+        setLocationRelativeTo(null);
         setUndecorated(true);
-        setVisible(true);
     }
-    
-    public void actionPerformed(ActionEvent ae){
+
+    @Override
+    public void actionPerformed(ActionEvent ae) {
         setVisible(false);
-        new Transactions(pin).setVisible(true);
+        new Transactions(accountNumber).setVisible(true);
     }
-    
-    public static void main(String[] args){
-        new BalanceEnquiry("").setVisible(true);
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new BalanceEnquiry("").setVisible(true));
     }
 }

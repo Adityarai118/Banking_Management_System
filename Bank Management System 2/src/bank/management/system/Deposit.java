@@ -1,79 +1,96 @@
 package bank.management.system;
 
-import java.awt.*;
-import javax.swing.*;
-import java.awt.event.*;
-import java.util.*;
+import bank.management.system.service.AccountService;
 
-public class Deposit extends JFrame implements ActionListener{
-    JLabel l1,l2,l3;
-    JTextField t1,t2;
-    JButton b1,b2,b3;
-    
-    String pin;
-    Deposit(String pin){
-        this.pin = pin;
-        
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+/**
+ * Screen for depositing cash into an account with numeric validation.
+ */
+public class Deposit extends JFrame implements ActionListener {
+
+    private final String accountNumber;
+    private final JTextField t1;
+    private final JButton b1, b2;
+    private final AccountService accountService;
+
+    public Deposit(String accountNumber) {
+        this.accountNumber = accountNumber;
+        this.accountService = new AccountService();
+
         setLayout(null);
-        
+
         ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("icon/icons/atm.jpg"));
-        Image i2 = i1.getImage().getScaledInstance(700, 700, Image.SCALE_DEFAULT);
-        ImageIcon i3 = new ImageIcon(i2);
-        JLabel l2 = new JLabel(i3);
-        l2.setBounds(0, 0, 700, 700);
-        add(l2);
-        
-        l1 = new JLabel("ENTER AMOUNT TO DEPOSIT");
+        Image i2 = i1.getImage().getScaledInstance(700, 700, Image.SCALE_SMOOTH);
+        JLabel background = new JLabel(new ImageIcon(i2));
+        background.setBounds(0, 0, 700, 700);
+        add(background);
+
+        JLabel l1 = new JLabel("ENTER AMOUNT TO DEPOSIT");
         l1.setForeground(Color.WHITE);
-        l1.setFont(new Font("System", Font.BOLD, 16));
-        l1.setBounds(135,220,300,35);
-        l2.add(l1);
-        
+        l1.setFont(new Font("System", Font.BOLD, 15));
+        l1.setBounds(135, 220, 300, 30);
+        background.add(l1);
+
         t1 = new JTextField();
-        t1.setFont(new Font("Raleway", Font.BOLD, 22));
-        t1.setBounds(122,260,280,25);
-        l2.add(t1);
-        
+        t1.setFont(new Font("Raleway", Font.BOLD, 18));
+        t1.setBounds(135, 260, 240, 30);
+        background.add(t1);
+
         b1 = new JButton("DEPOSIT");
-        b1.setBounds(250,350,150,30);
-        l2.add(b1);
-        
+        b1.setBounds(245, 340, 130, 28);
+        background.add(b1);
+
         b2 = new JButton("BACK");
-        b2.setBounds(250,390,150,30);
-        l2.add(b2);
-        
+        b2.setBounds(245, 375, 130, 28);
+        background.add(b2);
+
         b1.addActionListener(this);
         b2.addActionListener(this);
-        
+
         setSize(700, 700);
-        setLocation(200, 0);
-        setVisible(true);
+        setLocationRelativeTo(null);
+        setUndecorated(true);
     }
-    
-    public void actionPerformed(ActionEvent ae){
-         try{        
-            String amount = t1.getText();
-            Date date = new Date();
-            if(ae.getSource()==b1){
-                if(t1.getText().equals("")){
-                    JOptionPane.showMessageDialog(null, "Please enter the Amount to you want to Deposit");
-                }else{
-                    Conn c1 = new Conn();
-                    c1.s.executeUpdate("insert into bank values('"+pin+"', '"+date+"', 'Deposit', '"+amount+"')");
-                    JOptionPane.showMessageDialog(null, "Rs. "+amount+" Deposited Successfully");
-                    setVisible(false);
-                    new Transactions(pin).setVisible(true);
-                }
-            }else if(ae.getSource()==b2){
-                setVisible(false);
-                new Transactions(pin).setVisible(true);
+
+    @Override
+    public void actionPerformed(ActionEvent ae) {
+        if (ae.getSource() == b1) {
+            String amountStr = t1.getText().trim();
+            if (amountStr.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter the amount to deposit.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return;
             }
-        }catch(Exception e){
-            System.out.println(e);
+
+            try {
+                double amount = Double.parseDouble(amountStr);
+                if (amount <= 0) {
+                    JOptionPane.showMessageDialog(this, "Deposit amount must be greater than zero.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                double newBalance = accountService.deposit(accountNumber, amount, "ATM Cash Deposit");
+                JOptionPane.showMessageDialog(this, String.format("Rs. %.2f deposited successfully.\nNew Balance: Rs. %.2f", amount, newBalance),
+                        "Deposit Successful", JOptionPane.INFORMATION_MESSAGE);
+
+                setVisible(false);
+                new Transactions(accountNumber).setVisible(true);
+
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid numeric amount.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Transaction Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } else if (ae.getSource() == b2) {
+            setVisible(false);
+            new Transactions(accountNumber).setVisible(true);
         }
     }
-    
-    public static void main(String []args){
-        new Deposit("").setVisible(true);
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new Deposit("").setVisible(true));
     }
 }

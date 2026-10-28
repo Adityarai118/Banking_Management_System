@@ -1,239 +1,251 @@
 package bank.management.system;
+
+import bank.management.system.model.Account;
+import bank.management.system.model.Customer;
+import bank.management.system.service.AccountService;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
+import java.util.Random;
 
-public class SignUp3 extends JFrame implements ActionListener{
-    JLabel l1,l2,l3,l4,l5,l6,l7,l8,l9,l10,l11,l12;
-    JRadioButton r1,r2,r3,r4;
-    JCheckBox c1,c2,c3,c4,c5,c6,c7;
-    JButton b1,b2;
-    String formno;
-    
-    SignUp3(String formno){
-        this.formno = formno;
-        
-        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("icon/icons/logo.jpg"));
-        Image i2 = i1.getImage().getScaledInstance(100, 100, Image.SCALE_DEFAULT);
-        ImageIcon i3 = new ImageIcon(i2);
-        JLabel label = new JLabel(i3);
-        label.setBounds(20, 0, 100, 100);
-        add(label);
-        
+/**
+ * Step 3 of the registration wizard: Account Configuration and Credential Issuance.
+ */
+public class SignUp3 extends JFrame implements ActionListener {
+
+    private final Customer customer;
+    private final JRadioButton r1, r2, r3, r4;
+    private final JCheckBox c1, c2, c3, c4, c5, c6, c7;
+    private final JTextField pinField;
+    private final JButton b1, b2;
+    private final AccountService accountService;
+
+    public SignUp3(Customer customer) {
+        this.customer = customer != null ? customer : new Customer();
+        this.accountService = new AccountService();
+
+        setTitle("NEW ACCOUNT APPLICATION FORM - STEP 3");
         setLayout(null);
-        
-        setTitle("NEW ACCOUNT APPLICATION FORM - PAGE 3");
-        
-        l1 = new JLabel("Page 3: Account Details");
+
+        try {
+            ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("icon/icons/logo.jpg"));
+            Image i2 = i1.getImage().getScaledInstance(90, 90, Image.SCALE_SMOOTH);
+            JLabel label = new JLabel(new ImageIcon(i2));
+            label.setBounds(25, 10, 90, 90);
+            add(label);
+        } catch (Exception ignored) {}
+
+        JLabel l1 = new JLabel("Page 3: Account & Credential Details");
         l1.setFont(new Font("Raleway", Font.BOLD, 22));
-        l1.setBounds(280,40,400,40);
+        l1.setBounds(250, 40, 450, 30);
         add(l1);
-        
-        l2 = new JLabel("Account Type: ");
-        l2.setFont(new Font("Raleway", Font.BOLD, 22));
-        l2.setBounds(100,140,200,30);
+
+        // Account Type
+        JLabel l2 = new JLabel("Account Type:");
+        l2.setFont(new Font("Raleway", Font.BOLD, 16));
+        l2.setBounds(100, 110, 200, 25);
         add(l2);
-        
+
         r1 = new JRadioButton("Saving Account");
-        r1.setFont(new Font("Raleway", Font.BOLD, 16));
+        r1.setFont(new Font("Raleway", Font.PLAIN, 14));
         r1.setBackground(Color.WHITE);
-        r1.setBounds(100,180,150,30);
+        r1.setBounds(100, 140, 160, 25);
         add(r1);
-        
+
         r2 = new JRadioButton("Fixed Deposit Account");
-        r2.setFont(new Font("Raleway", Font.BOLD, 16));
+        r2.setFont(new Font("Raleway", Font.PLAIN, 14));
         r2.setBackground(Color.WHITE);
-        r2.setBounds(350,180,300,30);
+        r2.setBounds(300, 140, 200, 25);
         add(r2);
-        
+
         r3 = new JRadioButton("Current Account");
-        r3.setFont(new Font("Raleway", Font.BOLD, 16));
+        r3.setFont(new Font("Raleway", Font.PLAIN, 14));
         r3.setBackground(Color.WHITE);
-        r3.setBounds(100,220,250,30);
+        r3.setBounds(100, 170, 160, 25);
         add(r3);
-        
+
         r4 = new JRadioButton("Recurring Deposit Account");
-        r4.setFont(new Font("Raleway", Font.BOLD, 16));
+        r4.setFont(new Font("Raleway", Font.PLAIN, 14));
         r4.setBackground(Color.WHITE);
-        r4.setBounds(350,220,250,30);
+        r4.setBounds(300, 170, 220, 25);
         add(r4);
-        
+
         ButtonGroup acheck = new ButtonGroup();
         acheck.add(r1);
         acheck.add(r2);
         acheck.add(r3);
         acheck.add(r4);
-        
-        l3 = new JLabel("Card NO.: ");
-        l3.setFont(new Font("Raleway", Font.BOLD, 22));
-        l3.setBounds(100,280,200,30);
+        r1.setSelected(true);
+
+        // Card Info
+        JLabel l3 = new JLabel("Card Number:");
+        l3.setFont(new Font("Raleway", Font.BOLD, 16));
+        l3.setBounds(100, 220, 200, 25);
         add(l3);
-        
-        l4 = new JLabel("XXXX-XXXX-XXXX-4184");
-        l4.setFont(new Font("Raleway", Font.BOLD, 18));
-        l4.setBounds(330,280,300,30);
+
+        JLabel l4 = new JLabel("XXXX-XXXX-XXXX-(Auto-Generated 16 Digits)");
+        l4.setFont(new Font("Raleway", Font.BOLD, 14));
+        l4.setForeground(Color.DARK_GRAY);
+        l4.setBounds(300, 220, 380, 25);
         add(l4);
-        
-        l5 = new JLabel("Your 16 digits Card NO.");
-        l5.setFont(new Font("Raleway", Font.BOLD, 12));
-        l5.setBounds(100,300,300,30);
-        add(l5);
-        
-        l6 = new JLabel("PIN: ");
-        l6.setFont(new Font("Raleway", Font.BOLD, 22));
-        l6.setBounds(100,340,200,30);
+
+        // PIN Setup
+        JLabel l6 = new JLabel("Set 4-Digit ATM PIN:");
+        l6.setFont(new Font("Raleway", Font.BOLD, 16));
+        l6.setBounds(100, 260, 200, 25);
         add(l6);
-        
-        l7 = new JLabel("XXXX");
-        l7.setFont(new Font("Raleway", Font.BOLD, 18));
-        l7.setBounds(330,340,300,30);
-        add(l7);
-        
-        l8 = new JLabel("4 digit PIN");
-        l8.setFont(new Font("Raleway", Font.BOLD, 12));
-        l8.setBounds(100,360,300,30);
-        add(l8);
-        
-        l9 = new JLabel("Services Required: ");
-        l9.setFont(new Font("Raleway", Font.BOLD, 22));
-        l9.setBounds(100,400,300,30);
+
+        Random ran = new Random();
+        int defaultPin = 1000 + ran.nextInt(9000);
+        pinField = new JTextField(String.valueOf(defaultPin));
+        pinField.setFont(new Font("Raleway", Font.BOLD, 16));
+        pinField.setBounds(300, 260, 100, 28);
+        add(pinField);
+
+        JLabel pinHint = new JLabel("(4-digit numerical security PIN)");
+        pinHint.setFont(new Font("Raleway", Font.ITALIC, 12));
+        pinHint.setForeground(Color.GRAY);
+        pinHint.setBounds(415, 260, 250, 28);
+        add(pinHint);
+
+        // Services
+        JLabel l9 = new JLabel("Services Required:");
+        l9.setFont(new Font("Raleway", Font.BOLD, 16));
+        l9.setBounds(100, 310, 200, 25);
         add(l9);
-        
-        c1 = new JCheckBox("ATM CARD");
+
+        c1 = new JCheckBox("ATM / Debit CARD", true);
         c1.setBackground(Color.WHITE);
-        c1.setFont(new Font("Raleway", Font.BOLD, 16));
-        c1.setBounds(100,440,200,30);
+        c1.setFont(new Font("Raleway", Font.PLAIN, 13));
+        c1.setBounds(100, 340, 180, 25);
         add(c1);
-        
-        c2 = new JCheckBox("Internet Banking");
+
+        c2 = new JCheckBox("Internet Banking", true);
         c2.setBackground(Color.WHITE);
-        c2.setFont(new Font("Raleway", Font.BOLD, 16));
-        c2.setBounds(350,440,200,30);
+        c2.setFont(new Font("Raleway", Font.PLAIN, 13));
+        c2.setBounds(300, 340, 180, 25);
         add(c2);
-        
-        c3 = new JCheckBox("Mobile Banking");
+
+        c3 = new JCheckBox("Mobile Banking", true);
         c3.setBackground(Color.WHITE);
-        c3.setFont(new Font("Raleway", Font.BOLD, 16));
-        c3.setBounds(100,480,200,30);
+        c3.setFont(new Font("Raleway", Font.PLAIN, 13));
+        c3.setBounds(100, 370, 180, 25);
         add(c3);
-        
-        c4 = new JCheckBox("EMAIL Alerts");
+
+        c4 = new JCheckBox("EMAIL Alerts", true);
         c4.setBackground(Color.WHITE);
-        c4.setFont(new Font("Raleway", Font.BOLD, 16));
-        c4.setBounds(350,480,200,30);
+        c4.setFont(new Font("Raleway", Font.PLAIN, 13));
+        c4.setBounds(300, 370, 180, 25);
         add(c4);
-        
+
         c5 = new JCheckBox("Cheque Book");
         c5.setBackground(Color.WHITE);
-        c5.setFont(new Font("Raleway", Font.BOLD, 16));
-        c5.setBounds(100,520,200,30);
+        c5.setFont(new Font("Raleway", Font.PLAIN, 13));
+        c5.setBounds(100, 400, 180, 25);
         add(c5);
-        
-        c6 = new JCheckBox("E-Statement");
+
+        c6 = new JCheckBox("E-Statement", true);
         c6.setBackground(Color.WHITE);
-        c6.setFont(new Font("Raleway", Font.BOLD, 16));
-        c6.setBounds(350,520,200,30);
+        c6.setFont(new Font("Raleway", Font.PLAIN, 13));
+        c6.setBounds(300, 400, 180, 25);
         add(c6);
-        
-        c7 = new JCheckBox("I hereby declares that the above entered details correct to th best of my knowledge.",true);
+
+        // Declaration
+        c7 = new JCheckBox("I hereby declare that the information provided is true and accurate.", true);
         c7.setBackground(Color.WHITE);
         c7.setFont(new Font("Raleway", Font.BOLD, 12));
-        c7.setBounds(100,570,600,20);
+        c7.setBounds(100, 450, 580, 25);
         add(c7);
-        
-        b1 = new JButton("Submit");
-        b1.setFont(new Font("Raleway", Font.BOLD, 14));
+
+        // Buttons
+        b1 = new JButton("SUBMIT & CREATE ACCOUNT");
+        b1.setFont(new Font("Raleway", Font.BOLD, 13));
         b1.setBackground(Color.BLACK);
         b1.setForeground(Color.WHITE);
-        b1.setBounds(250,620,100,30);
+        b1.setBounds(200, 510, 240, 35);
         add(b1);
-        
-        b2 = new JButton("Cancel");
-        b2.setFont(new Font("Raleway", Font.BOLD, 14));
-        b2.setBackground(Color.BLACK);
+
+        b2 = new JButton("CANCEL");
+        b2.setFont(new Font("Raleway", Font.BOLD, 13));
+        b2.setBackground(Color.GRAY);
         b2.setForeground(Color.WHITE);
-        b2.setBounds(420,620,100,30);
+        b2.setBounds(460, 510, 120, 35);
         add(b2);
-        
-        getContentPane().setBackground(Color.WHITE);
-        
-        setSize(850,850);
-        setLocation(500,120);
-        setVisible(true);
-        
+
         b1.addActionListener(this);
         b2.addActionListener(this);
+
+        getContentPane().setBackground(Color.WHITE);
+        setSize(780, 630);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-    
-    public void actionPerformed(ActionEvent ae){
-         String atype = null;
-        if(r1.isSelected()){ 
-            atype = "Saving Account";
+
+    public SignUp3(String formno) {
+        this(new Customer(formno, "", "", "", "", "", "", "", "", "", ""));
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent ae) {
+        if (ae.getSource() == b2) {
+            setVisible(false);
+            new Login().setVisible(true);
+            return;
         }
-        else if(r2.isSelected()){ 
-            atype = "Fixed Deposit Account";
+
+        if (!c7.isSelected()) {
+            JOptionPane.showMessageDialog(this, "Please accept the declaration to proceed.", "Declaration Required", JOptionPane.WARNING_MESSAGE);
+            return;
         }
-        else if(r3.isSelected()){ 
-            atype = "Current Account";
-        }else if(r4.isSelected()){ 
-            atype = "Recurring Deposit Account";
+
+        String atype = r1.isSelected() ? "Saving Account"
+                : (r2.isSelected() ? "Fixed Deposit Account"
+                : (r3.isSelected() ? "Current Account" : "Recurring Deposit Account"));
+
+        String pin = pinField.getText().trim();
+        if (!pin.matches("\\d{4}")) {
+            JOptionPane.showMessageDialog(this, "PIN must be exactly 4 numeric digits.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            return;
         }
-        
-        Random ran = new Random();
-        long first7 = (ran.nextLong() % 90000000L) + 5040936000000000L;
-        String cardno = "" + Math.abs(first7);
-        
-        long first3 = (ran.nextLong() % 9000L) + 1000L;
-        String pin = "" + Math.abs(first3);
-        
-        String facility = "";
-        if(c1.isSelected()){ 
-            facility = facility + " ATM Card";
-        }
-        if(c2.isSelected()){ 
-            facility = facility + " Internet Banking";
-        }
-        if(c3.isSelected()){ 
-            facility = facility + " Mobile Banking";
-        }
-        if(c4.isSelected()){ 
-            facility = facility + " EMAIL Alerts";
-        }
-        if(c5.isSelected()){ 
-            facility = facility + " Cheque Book";
-        }
-        if(c6.isSelected()){ 
-            facility = facility + " E-Statement";
-        }
-        
-        try{
-            if(ae.getSource()==b1){
+
+        StringBuilder facilities = new StringBuilder();
+        if (c1.isSelected()) facilities.append("ATM Card, ");
+        if (c2.isSelected()) facilities.append("Internet Banking, ");
+        if (c3.isSelected()) facilities.append("Mobile Banking, ");
+        if (c4.isSelected()) facilities.append("EMAIL Alerts, ");
+        if (c5.isSelected()) facilities.append("Cheque Book, ");
+        if (c6.isSelected()) facilities.append("E-Statement, ");
+        String facStr = facilities.length() > 2 ? facilities.substring(0, facilities.length() - 2) : "Standard";
+
+        try {
+            Account account = accountService.createAccount(customer, atype, facStr, pin);
+
+            String msg = String.format("""
+                Account Created Successfully!
                 
-                if(atype.equals("")){
-                    JOptionPane.showMessageDialog(null, "Fill all the required fields");
-                }else{
-                    Conn c = new Conn();
-                    String q1 = "insert into signup3 values('"+formno+"','"+atype+"','"+cardno+"','"+pin+"','"+facility+"')";  
-                    String q2 = "insert into login values('"+formno+"','"+cardno+"','"+pin+"')";
-                    c.s.executeUpdate(q1);
-                    c.s.executeUpdate(q2);
-                    JOptionPane.showMessageDialog(null, "Card Number: " + cardno + "\n Pin:"+ pin);
-                    
-                    new Deposit(pin).setVisible(true);
-                    setVisible(false);
-                }
-            
-            }else if(ae.getSource()==b2){
-                System.exit(0);
-            }
-            
-        }catch(Exception e){
-            System.out.println(e);
+                ======================================
+                Account Number:  %s
+                Card Number:     %s
+                4-Digit PIN:     %s
+                Account Type:    %s
+                ======================================
+                
+                Please record these credentials securely.
+                You can now log in to the ATM using your Card Number and PIN.
+                """, account.getAccountNumber(), account.getCardNumber(), pin, account.getAccountType());
+
+            JOptionPane.showMessageDialog(this, msg, "Account Created", JOptionPane.INFORMATION_MESSAGE);
+
+            setVisible(false);
+            new Deposit(account.getAccountNumber()).setVisible(true);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Failed to create account: " + e.getMessage(), "Registration Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-     
-    public static void main(String[] args){
-        new SignUp3("").setVisible(true);
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new SignUp3(new Customer()).setVisible(true));
     }
 }
